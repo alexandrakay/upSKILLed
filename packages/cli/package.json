@@ -1,0 +1,26 @@
+{
+  "name": "upskilled",
+  "version": "0.0.1",
+  "description": "Generate Claude skill files for any API or CLI tool",
+  "type": "module",
+  "bin": {
+    "upskilled": "bin/upskilled.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude",
+    "ai",
+    "skills",
+    "cli",
+    "anthropic"
+  ],
+  "author": "Alexandra Myers",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexandrakay/upSKILLed.git"
+  },
+  "homepage": "https://getupskilled.dev"
+}
