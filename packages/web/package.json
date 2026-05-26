@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --experimental-strip-types --test test/generate-handler.test.ts"
   },
   "dependencies": {
     "@upskilled/core": "*",
     "autoprefixer": "^10.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "firebase-admin": "^13.10.0",
     "lucide-react": "^1.16.0",
     "next": "14.2.29",
     "postcss": "^8.4.31",
@@ -24,6 +26,7 @@
     "@types/node": "^20.19.41",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "tsx": "^4.22.3",
     "typescript": "^5"
   }
 }

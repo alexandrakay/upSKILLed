@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only read/write their own profile
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Rate limit counters and generation logs — server-side writes only
+    match /usage/{identifier} {
+      allow read, write: if false;
+    }
+
+    match /generations/{generationId} {
+      allow read, write: if false;
+    }
+  }
+}

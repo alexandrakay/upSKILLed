@@ -19,6 +19,16 @@ export function buildExamplesMd(name, examples) {
   return lines.join('\n');
 }
 
+export function formatContent(result, nameOverride) {
+  const prefix = nameOverride ? slugify(nameOverride) : slugify(result.config.name);
+  return {
+    name: prefix,
+    skillContent: result.skill.markdownContent,
+    configContent: JSON.stringify(result.config, null, 2),
+    examplesContent: buildExamplesMd(result.skill.name, result.examples),
+  };
+}
+
 export async function writeFiles(result, { output, name } = {}) {
   const prefix = name ? slugify(name) : slugify(result.config.name);
   const outDir = output || process.cwd();
