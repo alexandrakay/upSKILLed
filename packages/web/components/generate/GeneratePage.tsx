@@ -16,6 +16,7 @@ import {
   incrementLocalUsage,
   saveLastGeneration,
   loadLastGeneration,
+  parseSSEBuffer,
   type GenerateOutput,
 } from '@/lib/generate-logic';
 
@@ -113,6 +114,27 @@ export function GeneratePage() {
             if (count >= DAILY_LIMIT) setAnonLimited(true);
           }
           break outer;
+        }
+      }
+
+      // Drain any result event still in the buffer when the stream closed
+      if (buffer) {
+        const event = parseSSEBuffer(buffer);
+        if (event?.type === 'result') {
+          setOutput(event.payload as GenerateOutput);
+          saveLastGeneration(event.payload as GenerateOutput);
+          if (!user) {
+            const { count } = incrementLocalUsage();
+            setUsageCount(count);
+            if (count >= DAILY_LIMIT) setAnonLimited(true);
+          }
+        } else if (event?.type === 'error') {
+          if (event.payload.status === 429) {
+            setAnonLimited(true);
+            setSignInOpen(true);
+          } else {
+            setError(event.payload.error ?? `Error ${event.payload.status}`);
+          }
         }
       }
     } catch (err: any) {
