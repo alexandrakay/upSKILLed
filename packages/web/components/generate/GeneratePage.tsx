@@ -92,6 +92,7 @@ export function GeneratePage() {
       const decoder = new TextDecoder();
       let buffer = '';
       let resultReceived = false;
+      let errorHandled = false;
 
       outer: while (true) {
         const { done, value } = await reader.read();
@@ -104,6 +105,7 @@ export function GeneratePage() {
           const payload = JSON.parse(part.slice(6));
           if (payload.ping || payload.delta !== undefined) continue;
           if (payload.error) {
+            errorHandled = true;
             if (payload.status === 429) {
               setAnonLimited(true);
               setSignInOpen(true);
@@ -137,6 +139,7 @@ export function GeneratePage() {
             if (count >= DAILY_LIMIT) setAnonLimited(true);
           }
         } else if (event?.type === 'error') {
+          errorHandled = true;
           if (event.payload.status === 429) {
             setAnonLimited(true);
             setSignInOpen(true);
@@ -146,7 +149,7 @@ export function GeneratePage() {
         }
       }
 
-      if (!resultReceived) {
+      if (!resultReceived && !errorHandled) {
         setError('Generation finished with no output — check Vercel function logs for details.');
       }
     } catch (err: any) {
