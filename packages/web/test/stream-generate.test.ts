@@ -40,3 +40,19 @@ test('wraps thrown error in data event', async () => {
   assert.equal(data.error, 'boom');
   assert.equal(data.status, 500);
 });
+
+test('ping events are emitted as JSON data events not SSE comments', async () => {
+  const res = await wrapInSSE(
+    () => new Promise<Response>((resolve) => setTimeout(() => resolve(Response.json({ ok: true })), 20)),
+    { pingIntervalMs: 1 }
+  );
+  const text = await res.text();
+  const lines = text.split('\n\n').filter(Boolean);
+  const comments = lines.filter((l) => l.startsWith(':'));
+  assert.equal(comments.length, 0, 'should have no SSE comment lines');
+  const pingEvents = lines
+    .filter((l) => l.startsWith('data: '))
+    .map((l) => JSON.parse(l.slice(6)))
+    .filter((e) => e.ping === true);
+  assert.ok(pingEvents.length >= 1, 'should have at least one ping data event');
+});

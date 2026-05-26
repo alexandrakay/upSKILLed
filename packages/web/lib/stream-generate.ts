@@ -4,12 +4,15 @@ function sseData(payload: unknown): Uint8Array {
   return encoder.encode(`data: ${JSON.stringify(payload)}\n\n`);
 }
 
-export async function wrapInSSE(innerFn: () => Promise<Response>): Promise<Response> {
+export async function wrapInSSE(
+  innerFn: () => Promise<Response>,
+  { pingIntervalMs = 10_000 } = {}
+): Promise<Response> {
   const stream = new ReadableStream({
     async start(controller) {
       const ping = setInterval(() => {
-        try { controller.enqueue(encoder.encode(': ping\n\n')); } catch {}
-      }, 10_000);
+        try { controller.enqueue(encoder.encode('data: {"ping":true}\n\n')); } catch {}
+      }, pingIntervalMs);
 
       try {
         const res = await innerFn();
