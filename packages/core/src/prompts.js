@@ -1,4 +1,7 @@
 import { getService } from './services.js';
+import { getTool } from './tools.js';
+
+const MAX_HELP_BYTES = 32 * 1024;
 
 const SYSTEM_PROMPT = `You are an expert at creating Claude skill packages — structured files that help Claude understand and work with a specific API or CLI tool.
 
@@ -67,6 +70,69 @@ ${svc.capabilities.map((c) => `- ${c}`).join('\n')}
 **Use case to optimize for**: ${useCase}
 
 Generate a complete Claude skill package for ${svc.displayName}. The skill.md and config.json should be especially helpful for a developer who wants to: ${useCase}.`;
+
+  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+}
+
+export function buildToolPrompt(tool, useCase) {
+  const t = getTool(tool);
+
+  const toolDefinition = `## CLI Tool: ${t.displayName}
+
+**Description**: ${t.description}
+**Docs**: ${t.docsUrl}
+
+**Common flags / subcommands**:
+${t.commonFlags.map((f) => `  ${f}`).join('\n')}
+
+**Capabilities**:
+${t.capabilities.map((c) => `- ${c}`).join('\n')}
+
+**Common use cases**: ${t.useCases.join('; ')}`;
+
+  const userMessage = `${toolDefinition}
+
+---
+
+**Use case to optimize for**: ${useCase}
+
+Generate a complete Claude skill package for ${t.displayName}. The skill.md should read like expert documentation a security professional or developer would reference while using ${t.displayName} to: ${useCase}.`;
+
+  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+}
+
+export function buildDescribePrompt(description, useCase) {
+  const userMessage = `## Custom Service/Tool Description
+
+${description}
+
+---
+
+**Use case to optimize for**: ${useCase}
+
+Generate a complete Claude skill package based on the description above. Infer the authentication type, base URL patterns, and capabilities from the description. The skill should be optimized for a developer who wants to: ${useCase}.`;
+
+  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+}
+
+export function buildHelpPrompt(helpText, useCase) {
+  let truncated = helpText;
+  if (Buffer.byteLength(helpText, 'utf8') > MAX_HELP_BYTES) {
+    truncated = helpText.slice(0, MAX_HELP_BYTES);
+    process.stderr.write(`Warning: --help input exceeded 32KB and was truncated.\n`);
+  }
+
+  const userMessage = `## CLI Tool --help Output
+
+\`\`\`
+${truncated}
+\`\`\`
+
+---
+
+**Use case to optimize for**: ${useCase}
+
+Generate a complete Claude skill package based on the --help output above. Infer the tool name, purpose, authentication, and capabilities from the help text. The skill should be optimized for a developer who wants to: ${useCase}.`;
 
   return { systemPrompt: SYSTEM_PROMPT, userMessage };
 }
