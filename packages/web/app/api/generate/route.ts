@@ -1,9 +1,21 @@
 import { generateContent } from '@upskilled/core';
-import { getFirestore } from '@/lib/firebase-admin';
+import { getFirestore, getAdminApp } from '@/lib/firebase-admin';
 import { handleGenerate } from '@/lib/generate-handler';
 import type { GenerateBody } from '@/lib/generate-handler';
 
 export const maxDuration = 30;
+
+async function resolveUid(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+  try {
+    const { uid } = await getAdminApp().auth().verifyIdToken(token);
+    return uid;
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(req: Request): Promise<Response> {
   let body: GenerateBody;
@@ -18,10 +30,12 @@ export async function POST(req: Request): Promise<Response> {
     req.headers.get('x-real-ip') ??
     'unknown';
 
+  const uid = await resolveUid(req);
+
   return handleGenerate(body, {
     db: getFirestore(),
     generateContent: (opts) => generateContent({ ...opts, useCase: opts.useCase ?? opts.use }),
     getClientIP: () => ip,
-    uid: null, // populated in #7 when Firebase Auth is wired
+    uid,
   });
 }
