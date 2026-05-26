@@ -1,10 +1,11 @@
-import { generateContent } from '@upskilled/core';
+import { streamContent } from '@upskilled/core';
 import { getFirestore, getAdminApp } from '@/lib/firebase-admin';
-import { handleGenerate } from '@/lib/generate-handler';
-import { wrapInSSE } from '@/lib/stream-generate';
-import type { GenerateBody } from '@/lib/generate-handler';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 60;
+
+const VALID_PATHS = ['service', 'tool', 'custom-describe', 'custom-help'];
+const encoder = new TextEncoder();
 
 async function resolveUid(req: Request): Promise<string | null> {
   const authHeader = req.headers.get('Authorization');
@@ -19,11 +20,21 @@ async function resolveUid(req: Request): Promise<string | null> {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  let body: GenerateBody;
+  let body: { path: string; input: string; use: string };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { path, input, use: useCase } = body ?? {};
+
+  if (!useCase) return Response.json({ error: '--use is required' }, { status: 400 });
+  if (!VALID_PATHS.includes(path)) {
+    return Response.json(
+      { error: `unrecognized path "${path}". Valid: ${VALID_PATHS.join(', ')}` },
+      { status: 400 }
+    );
   }
 
   const ip =
@@ -32,13 +43,55 @@ export async function POST(req: Request): Promise<Response> {
     'unknown';
 
   const uid = await resolveUid(req);
+  const db = getFirestore();
 
-  return wrapInSSE(() =>
-    handleGenerate(body, {
-      db: getFirestore(),
-      generateContent: (opts) => generateContent({ ...opts, useCase: opts.useCase ?? opts.use }),
-      getClientIP: () => ip,
-      uid,
-    })
-  );
+  // Rate limit anonymous users before opening the stream
+  if (!uid) {
+    const { allowed, resetAt } = await checkRateLimit(db, `ip:${ip}`);
+    if (!allowed) {
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ error: 'Rate limit exceeded', resetAt, status: 429 })}\n\n`)
+          );
+          controller.close();
+        },
+      });
+      return new Response(stream, sseHeaders());
+    }
+  }
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const enqueue = (data: unknown) => {
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`)); } catch {}
+      };
+      try {
+        const result = await streamContent(
+          { path, input, useCase },
+          { onDelta: (delta: string) => enqueue({ delta }) }
+        );
+        await db.collection('generations').add({
+          path, input, useCase, createdAt: new Date(), uid: uid ?? null,
+        });
+        enqueue(result);
+      } catch (err: any) {
+        enqueue({ error: err?.message ?? 'Internal error', status: 500 });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, sseHeaders());
+}
+
+function sseHeaders() {
+  return {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'X-Accel-Buffering': 'no',
+    },
+  };
 }

@@ -40,6 +40,23 @@ async function callClaude(client, systemPrompt, userMessage) {
   return response.content.find((b) => b.type === 'text')?.text ?? '';
 }
 
+async function callClaudeStream(client, systemPrompt, userMessage, onDelta) {
+  let text = '';
+  const stream = client.messages.stream({
+    model: MODEL,
+    max_tokens: 8192,
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: userMessage }],
+  });
+  for await (const chunk of stream) {
+    if (chunk.type === 'content_block_delta' && chunk.delta?.type === 'text_delta') {
+      text += chunk.delta.text;
+      onDelta?.(chunk.delta.text);
+    }
+  }
+  return text;
+}
+
 async function generateWithRetry(client, systemPrompt, userMessage) {
   const raw = await callClaude(client, systemPrompt, userMessage);
   try {
@@ -79,6 +96,23 @@ export async function generate(options, { client } = {}) {
   const result = await generateWithRetry(anthropicClient, systemPrompt, userMessage);
 
   return writeFiles(result, { output: options.output, name: options.name });
+}
+
+// Streams tokens via onDelta as they arrive; returns formatted content when complete.
+export async function streamContent(options, { client, onDelta } = {}) {
+  validate(options);
+
+  const apiKey = client ? null : resolveApiKey(options);
+  const anthropicClient = client ?? new Anthropic({ apiKey });
+
+  const { systemPrompt, userMessage } = await buildPrompt(options);
+  const raw = await callClaudeStream(anthropicClient, systemPrompt, userMessage, onDelta);
+  try {
+    return formatContent(parseResponse(raw), options.name);
+  } catch {
+    const retryRaw = await callClaudeStream(anthropicClient, systemPrompt, userMessage + SCHEMA_REMINDER, onDelta);
+    return formatContent(parseResponse(retryRaw), options.name);
+  }
 }
 
 // Returns content as strings instead of writing to disk — used by the web API route.

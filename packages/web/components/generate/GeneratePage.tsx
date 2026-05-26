@@ -95,7 +95,7 @@ export function GeneratePage() {
         for (const part of parts) {
           if (!part.startsWith('data: ')) continue;
           const payload = JSON.parse(part.slice(6));
-          if (payload.ping) continue;
+          if (payload.ping || payload.delta !== undefined) continue;
           if (payload.error) {
             if (payload.status === 429) {
               setAnonLimited(true);
