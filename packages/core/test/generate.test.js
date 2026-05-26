@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { generate } from '../src/generate.js';
+import { generate, streamContent } from '../src/generate.js';
 
 const VALID_RESPONSE = {
   skill: {
@@ -35,6 +35,20 @@ function mockClient(responseText) {
       create: async () => ({
         content: [{ type: 'text', text: responseText }],
       }),
+    },
+  };
+}
+
+function mockStreamClient(responseText) {
+  return {
+    messages: {
+      create: async () => ({ content: [{ type: 'text', text: responseText }] }),
+      stream: () => {
+        async function* gen() {
+          yield { type: 'content_block_delta', delta: { type: 'text_delta', text: responseText } };
+        }
+        return gen();
+      },
     },
   };
 }
@@ -124,6 +138,21 @@ test('examples.md contains at least 5 prompts', async () => {
   const content = await readFile(join(outDir, 'github-examples.md'), 'utf8');
   const promptCount = (content.match(/^###?\s+/gm) || []).length;
   assert.ok(promptCount >= 5, `expected ≥5 prompts, got ${promptCount}`);
+});
+
+test('streamContent calls onDelta with tokens and returns formatted content', async () => {
+  const deltas = [];
+  const client = mockStreamClient(JSON.stringify(VALID_RESPONSE));
+
+  const result = await streamContent(
+    { path: 'service', input: 'github', useCase: 'manage issues', apiKey: 'test-key' },
+    { client, onDelta: (d) => deltas.push(d) }
+  );
+
+  assert.ok(deltas.length > 0, 'onDelta should have been called at least once');
+  assert.ok(result.skillContent, 'result should have skillContent');
+  assert.ok(result.configContent, 'result should have configContent');
+  assert.ok(result.examplesContent, 'result should have examplesContent');
 });
 
 test('jsonrepair fallback handles fence-wrapped response', async () => {
