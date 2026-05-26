@@ -108,8 +108,11 @@ export async function streamContent(options, { client, onDelta } = {}) {
   const { systemPrompt, userMessage } = await buildPrompt(options);
   const raw = await callClaudeStream(anthropicClient, systemPrompt, userMessage, onDelta);
   try {
-    return formatContent(parseResponse(raw), options.name);
-  } catch {
+    const parsed = parseResponse(raw);
+    console.log('[core] parsed keys:', Object.keys(parsed), 'skill keys:', Object.keys(parsed.skill ?? {}), 'config.name:', parsed.config?.name);
+    return formatContent(parsed, options.name);
+  } catch (err) {
+    console.error('[core] parse/format failed, retrying:', err?.message, '| raw length:', raw.length, '| raw start:', raw.slice(0, 100));
     const retryRaw = await callClaudeStream(anthropicClient, systemPrompt, userMessage + SCHEMA_REMINDER, onDelta);
     return formatContent(parseResponse(retryRaw), options.name);
   }

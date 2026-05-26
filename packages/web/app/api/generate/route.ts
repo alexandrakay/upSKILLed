@@ -69,10 +69,10 @@ export async function POST(req: Request): Promise<Response> {
       try {
         console.log('[generate] start', { path, input: String(input ?? '').slice(0, 80), uid: uid ?? 'anon' });
         const result = await streamContent(
-          { path, input, useCase },
+          { path, input, useCase, name: input },
           { onDelta: (delta: string) => enqueue({ delta }) }
         );
-        console.log('[generate] complete', { name: result?.name, hasSkill: !!result?.skillContent, hasConfig: !!result?.configContent });
+        console.log('[generate] complete', { name: result?.name, skillLen: result?.skillContent?.length ?? 0, hasConfig: !!result?.configContent });
         await db.collection('generations').add({
           path, input, useCase, createdAt: new Date(), uid: uid ?? null,
         });

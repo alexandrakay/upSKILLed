@@ -20,12 +20,21 @@ export function buildExamplesMd(name, examples) {
 }
 
 export function formatContent(result, nameOverride) {
-  const prefix = nameOverride ? slugify(nameOverride) : slugify(result.config.name);
+  const configName = result.config?.name ?? result.config?.service ?? result.skill?.name;
+  const prefix = nameOverride ? slugify(nameOverride) : slugify(configName);
+  if (!prefix || prefix === 'undefined') {
+    throw new Error(`Could not determine skill name. config.name=${result.config?.name}, config.service=${result.config?.service}`);
+  }
+  const skillContent =
+    result.skill?.markdownContent ??
+    result.skill?.content ??
+    result.skill?.markdown ??
+    '';
   return {
     name: prefix,
-    skillContent: result.skill.markdownContent,
-    configContent: JSON.stringify(result.config, null, 2),
-    examplesContent: buildExamplesMd(result.skill.name, result.examples),
+    skillContent,
+    configContent: JSON.stringify(result.config ?? {}, null, 2),
+    examplesContent: buildExamplesMd(result.skill?.name ?? prefix, result.examples ?? []),
   };
 }
 
