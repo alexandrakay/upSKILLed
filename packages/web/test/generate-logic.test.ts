@@ -5,6 +5,8 @@ import {
   incrementLocalUsage,
   buildFilenames,
   parseSSEBuffer,
+  loadLastGeneration,
+  saveLastGeneration,
   type GenerateOutput,
 } from '../lib/generate-logic.ts';
 
@@ -89,6 +91,48 @@ test('parseSSEBuffer returns error payload', () => {
 
 test('parseSSEBuffer returns null for empty buffer', () => {
   assert.equal(parseSSEBuffer(''), null);
+});
+
+// ── loadLastGeneration validation ────────────────────────────────────────────
+
+test('loadLastGeneration returns null when cache has name "undefined"', () => {
+  localStorageMock.clear();
+  localStorageMock.setItem('upskilled:last-generation', JSON.stringify({
+    name: 'undefined',
+    skillContent: '',
+    configContent: '{}',
+    examplesContent: '',
+  }));
+  assert.equal(loadLastGeneration(), null);
+});
+
+test('loadLastGeneration returns null when cache has empty name', () => {
+  localStorageMock.clear();
+  localStorageMock.setItem('upskilled:last-generation', JSON.stringify({
+    name: '',
+    skillContent: '# skill',
+    configContent: '{}',
+    examplesContent: '# ex',
+  }));
+  assert.equal(loadLastGeneration(), null);
+});
+
+test('loadLastGeneration returns null when cache has no name field', () => {
+  localStorageMock.clear();
+  localStorageMock.setItem('upskilled:last-generation', JSON.stringify({
+    skillContent: '# skill',
+    configContent: '{}',
+    examplesContent: '# ex',
+  }));
+  assert.equal(loadLastGeneration(), null);
+});
+
+test('loadLastGeneration returns valid entry unchanged', () => {
+  localStorageMock.clear();
+  const saved: GenerateOutput = { name: 'github', skillContent: '# s', configContent: '{}', examplesContent: '# e' };
+  saveLastGeneration(saved);
+  const loaded = loadLastGeneration();
+  assert.deepEqual(loaded, saved);
 });
 
 // ── File name helpers ─────────────────────────────────────────────────────────

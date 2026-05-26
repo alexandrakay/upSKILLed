@@ -44,7 +44,10 @@ export function saveLastGeneration(output: GenerateOutput): void {
 export function loadLastGeneration(): GenerateOutput | null {
   try {
     const raw = localStorage.getItem(LAST_GEN_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed: GenerateOutput = JSON.parse(raw);
+    if (!parsed.name || parsed.name === 'undefined') return null;
+    return parsed;
   } catch {
     return null;
   }
