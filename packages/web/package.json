@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test test/generate-handler.test.ts test/generate-logic.test.ts"
+    "test": "node --experimental-strip-types --test test/generate-handler.test.ts test/generate-logic.test.ts test/stream-generate.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

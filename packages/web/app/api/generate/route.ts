@@ -1,6 +1,7 @@
 import { generateContent } from '@upskilled/core';
 import { getFirestore, getAdminApp } from '@/lib/firebase-admin';
 import { handleGenerate } from '@/lib/generate-handler';
+import { wrapInSSE } from '@/lib/stream-generate';
 import type { GenerateBody } from '@/lib/generate-handler';
 
 export const maxDuration = 60;
@@ -32,10 +33,12 @@ export async function POST(req: Request): Promise<Response> {
 
   const uid = await resolveUid(req);
 
-  return handleGenerate(body, {
-    db: getFirestore(),
-    generateContent: (opts) => generateContent({ ...opts, useCase: opts.useCase ?? opts.use }),
-    getClientIP: () => ip,
-    uid,
-  });
+  return wrapInSSE(() =>
+    handleGenerate(body, {
+      db: getFirestore(),
+      generateContent: (opts) => generateContent({ ...opts, useCase: opts.useCase ?? opts.use }),
+      getClientIP: () => ip,
+      uid,
+    })
+  );
 }
