@@ -20,6 +20,12 @@ export function NavBar() {
           {!loading && (
             user ? (
               <>
+                <Link
+                  href="/skills"
+                  className="rounded-md px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-200"
+                >
+                  My Skills
+                </Link>
                 <span className="hidden text-xs text-neutral-500 sm:block">
                   {user.email ?? user.displayName}
                 </span>

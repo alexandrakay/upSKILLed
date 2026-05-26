@@ -14,7 +14,8 @@ service cloud.firestore {
     }
 
     match /generations/{generationId} {
-      allow read, write: if false;
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow write: if false;
     }
   }
 }

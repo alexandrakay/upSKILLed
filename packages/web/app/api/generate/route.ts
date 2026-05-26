@@ -77,6 +77,10 @@ export async function POST(req: Request): Promise<Response> {
         // Fire-and-forget — don't let a Firestore write delay or kill the response
         db.collection('generations').add({
           path, input, useCase, createdAt: new Date(), uid: uid ?? null,
+          name: result.name,
+          skillContent: result.skillContent,
+          configContent: result.configContent,
+          examplesContent: result.examplesContent,
         }).catch((e: any) => console.error('[generate] firestore write failed', e?.message));
       } catch (err: any) {
         console.error('[generate] error', err?.message, err?.stack);
