@@ -22,5 +22,12 @@
     "type": "git",
     "url": "git+https://github.com/alexandrakay/upSKILLed.git"
   },
-  "homepage": "https://getupskilled.dev"
+  "homepage": "https://getupskilled.dev",
+  "scripts": {
+    "test": "node --test test/cli.test.js"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "@upskilled/core": "*"
+  }
 }
