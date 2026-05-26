@@ -80,28 +80,39 @@ export function GeneratePage() {
         body: JSON.stringify({ path: getPath(), input: getInput(), use: useCase.trim() }),
       });
 
-      if (res.status === 429) {
-        setAnonLimited(true);
-        setSignInOpen(true);
-        setLoading(false);
-        return;
-      }
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No response body');
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setError(body.error ?? `Error ${res.status}`);
-        setLoading(false);
-        return;
-      }
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-      const data: GenerateOutput = await res.json();
-      setOutput(data);
-      saveLastGeneration(data);
-
-      if (!user) {
-        const { count } = incrementLocalUsage();
-        setUsageCount(count);
-        if (count >= DAILY_LIMIT) setAnonLimited(true);
+      outer: while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+        for (const part of parts) {
+          if (!part.startsWith('data: ')) continue;
+          const payload = JSON.parse(part.slice(6));
+          if (payload.error) {
+            if (payload.status === 429) {
+              setAnonLimited(true);
+              setSignInOpen(true);
+            } else {
+              setError(payload.error ?? `Error ${payload.status}`);
+            }
+            break outer;
+          }
+          setOutput(payload as GenerateOutput);
+          saveLastGeneration(payload as GenerateOutput);
+          if (!user) {
+            const { count } = incrementLocalUsage();
+            setUsageCount(count);
+            if (count >= DAILY_LIMIT) setAnonLimited(true);
+          }
+          break outer;
+        }
       }
     } catch (err: any) {
       setError(err.message ?? 'Something went wrong');
