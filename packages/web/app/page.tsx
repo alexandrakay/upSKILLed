@@ -166,7 +166,7 @@ export default function Home() {
         </p>
         <CopySnippet />
         <p className="mt-2 text-xs text-neutral-700">
-          npm package live now. Generates skill files directly to your project.
+          v1.0.0 on npm. Generates skill files directly to your project from the terminal.
         </p>
       </div>
 
