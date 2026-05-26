@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function ComingSoon() {
   const [copied, setCopied] = useState(false);
@@ -33,8 +34,12 @@ export default function ComingSoon() {
 
         <div style={styles.status}>
           <span style={styles.dot} />
-          Full release dropping this week
+          Now live
         </div>
+
+        <Link href="/generate" style={styles.cta}>
+          Try it →
+        </Link>
 
         <div style={styles.installRow}>
           <div style={styles.installBox}>
@@ -190,6 +195,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "0.8rem",
     color: "#555",
     marginTop: "-0.5rem",
+  },
+  cta: {
+    display: "inline-flex",
+    alignSelf: "flex-start",
+    background: "#a855f7",
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    padding: "0.65rem 1.5rem",
+    borderRadius: "8px",
+    textDecoration: "none",
+    transition: "background 0.15s ease",
   },
   links: {
     display: "flex",
