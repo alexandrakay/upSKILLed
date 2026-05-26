@@ -1,6 +1,7 @@
 {
   "name": "upskilled-monorepo",
   "private": true,
+  "packageManager": "npm@11.13.0",
   "workspaces": ["packages/*"],
   "scripts": {
     "dev": "turbo dev",
