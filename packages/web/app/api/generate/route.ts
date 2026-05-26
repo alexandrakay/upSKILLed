@@ -3,7 +3,7 @@ import { getFirestore, getAdminApp } from '@/lib/firebase-admin';
 import { handleGenerate } from '@/lib/generate-handler';
 import type { GenerateBody } from '@/lib/generate-handler';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 async function resolveUid(req: Request): Promise<string | null> {
   const authHeader = req.headers.get('Authorization');
