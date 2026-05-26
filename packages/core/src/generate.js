@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'node:fs/promises';
 import { buildServicePrompt, buildToolPrompt, buildDescribePrompt, buildHelpPrompt } from './prompts.js';
 import { parseResponse } from './parse.js';
-import { writeFiles } from './write.js';
+import { writeFiles, formatContent } from './write.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const SCHEMA_REMINDER = '\n\nIMPORTANT: Respond with ONLY the JSON object. No markdown fences, no prose. Start with { and end with }.';
@@ -79,4 +79,17 @@ export async function generate(options, { client } = {}) {
   const result = await generateWithRetry(anthropicClient, systemPrompt, userMessage);
 
   return writeFiles(result, { output: options.output, name: options.name });
+}
+
+// Returns content as strings instead of writing to disk — used by the web API route.
+export async function generateContent(options, { client } = {}) {
+  validate(options);
+
+  const apiKey = client ? null : resolveApiKey(options);
+  const anthropicClient = client ?? new Anthropic({ apiKey });
+
+  const { systemPrompt, userMessage } = await buildPrompt(options);
+  const result = await generateWithRetry(anthropicClient, systemPrompt, userMessage);
+
+  return formatContent(result, options.name);
 }
