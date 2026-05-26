@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
+import { NavBar } from "@/components/auth/NavBar";
 
 export const metadata: Metadata = {
   title: "upSKILLed — Claude, upSKILLed.",
@@ -14,7 +16,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          <NavBar />
+          <div className="pt-14">{children}</div>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
