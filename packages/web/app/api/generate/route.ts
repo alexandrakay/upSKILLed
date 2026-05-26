@@ -2,7 +2,7 @@ import { streamContent } from '@upskilled/core';
 import { getFirestore, getAdminApp } from '@/lib/firebase-admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const VALID_PATHS = ['service', 'tool', 'custom-describe', 'custom-help'];
 const encoder = new TextEncoder();
@@ -73,10 +73,11 @@ export async function POST(req: Request): Promise<Response> {
           { onDelta: (delta: string) => enqueue({ delta }) }
         );
         console.log('[generate] complete', { name: result?.name, skillLen: result?.skillContent?.length ?? 0, hasConfig: !!result?.configContent });
-        await db.collection('generations').add({
-          path, input, useCase, createdAt: new Date(), uid: uid ?? null,
-        });
         enqueue(result);
+        // Fire-and-forget — don't let a Firestore write delay or kill the response
+        db.collection('generations').add({
+          path, input, useCase, createdAt: new Date(), uid: uid ?? null,
+        }).catch((e: any) => console.error('[generate] firestore write failed', e?.message));
       } catch (err: any) {
         console.error('[generate] error', err?.message, err?.stack);
         enqueue({ error: err?.message ?? 'Internal error', status: 500 });
