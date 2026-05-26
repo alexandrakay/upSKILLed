@@ -4,6 +4,7 @@ import {
   getLocalUsage,
   incrementLocalUsage,
   buildFilenames,
+  parseSSEBuffer,
   type GenerateOutput,
 } from '../lib/generate-logic.ts';
 
@@ -59,6 +60,35 @@ test('getLocalUsage returns 0 when stored date is yesterday', () => {
   }));
   const { count } = getLocalUsage();
   assert.equal(count, 0);
+});
+
+// ── SSE buffer parser ─────────────────────────────────────────────────────────
+
+test('parseSSEBuffer returns result payload from incomplete buffer (no trailing \\n\\n)', () => {
+  const output: GenerateOutput = { name: 'github', skillContent: '# skill', configContent: '{}', examplesContent: '# ex' };
+  const buffer = `data: ${JSON.stringify(output)}`;
+  const event = parseSSEBuffer(buffer);
+  assert.equal(event?.type, 'result');
+  assert.deepEqual(event?.payload, output);
+});
+
+test('parseSSEBuffer skips delta events and returns result', () => {
+  const output: GenerateOutput = { name: 'github', skillContent: '# skill', configContent: '{}', examplesContent: '# ex' };
+  const buffer = `data: {"delta":"token1"}\n\ndata: {"delta":"token2"}\n\ndata: ${JSON.stringify(output)}`;
+  const event = parseSSEBuffer(buffer);
+  assert.equal(event?.type, 'result');
+  assert.deepEqual(event?.payload, output);
+});
+
+test('parseSSEBuffer returns error payload', () => {
+  const buffer = `data: {"error":"Rate limit exceeded","status":429}`;
+  const event = parseSSEBuffer(buffer);
+  assert.equal(event?.type, 'error');
+  assert.equal(event?.payload.status, 429);
+});
+
+test('parseSSEBuffer returns null for empty buffer', () => {
+  assert.equal(parseSSEBuffer(''), null);
 });
 
 // ── File name helpers ─────────────────────────────────────────────────────────

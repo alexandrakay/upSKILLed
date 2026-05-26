@@ -58,6 +58,22 @@ export function buildFilenames(output: GenerateOutput) {
   };
 }
 
+export type SSEEvent =
+  | { type: 'result'; payload: GenerateOutput }
+  | { type: 'error'; payload: { error: string; status?: number } };
+
+export function parseSSEBuffer(buffer: string): SSEEvent | null {
+  for (const part of buffer.split('\n\n')) {
+    if (!part.startsWith('data: ')) continue;
+    let payload: any;
+    try { payload = JSON.parse(part.slice(6)); } catch { continue; }
+    if (payload.ping || payload.delta !== undefined) continue;
+    if (payload.error) return { type: 'error', payload };
+    return { type: 'result', payload };
+  }
+  return null;
+}
+
 export function downloadText(filename: string, content: string): void {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
