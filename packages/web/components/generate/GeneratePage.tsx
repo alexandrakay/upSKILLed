@@ -66,6 +66,7 @@ export function GeneratePage() {
   const handleGenerate = async () => {
     if (!canGenerate) return;
     setLoading(true);
+    setOutput(null);
     setError(null);
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
