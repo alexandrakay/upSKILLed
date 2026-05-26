@@ -140,11 +140,15 @@ export function SignInModal({ open, onClose }: Props) {
 }
 
 async function maybeCreateUserDoc(uid: string, email: string | null) {
-  const db = getFirestore(getClientApp());
-  const ref = doc(db, 'users', uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { email, createdAt: new Date() });
+  try {
+    const db = getFirestore(getClientApp());
+    const ref = doc(db, 'users', uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, { email, createdAt: new Date() });
+    }
+  } catch {
+    // Non-critical — user doc creation failure should not block sign-in
   }
 }
 
