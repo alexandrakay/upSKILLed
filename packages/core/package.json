@@ -7,6 +7,10 @@
     ".": "./src/index.js"
   },
   "scripts": {
-    "test": "echo 'no core tests yet'"
+    "test": "node --test test/generate.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
+    "jsonrepair": "^3.14.0"
   }
 }

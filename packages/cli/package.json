@@ -1,6 +1,6 @@
 {
   "name": "upskilled",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Generate Claude skill files for any API or CLI tool",
   "type": "module",
   "bin": {
