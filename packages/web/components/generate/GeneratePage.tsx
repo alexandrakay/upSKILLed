@@ -81,11 +81,17 @@ export function GeneratePage() {
         body: JSON.stringify({ path: getPath(), input: getInput(), use: useCase.trim() }),
       });
 
+      if (!res.ok && res.headers.get('content-type')?.includes('application/json')) {
+        const errBody = await res.json();
+        throw new Error(errBody.error ?? `HTTP ${res.status}`);
+      }
+
       const reader = res.body?.getReader();
       if (!reader) throw new Error('No response body');
 
       const decoder = new TextDecoder();
       let buffer = '';
+      let resultReceived = false;
 
       outer: while (true) {
         const { done, value } = await reader.read();
@@ -106,6 +112,7 @@ export function GeneratePage() {
             }
             break outer;
           }
+          resultReceived = true;
           setOutput(payload as GenerateOutput);
           saveLastGeneration(payload as GenerateOutput);
           if (!user) {
@@ -121,6 +128,7 @@ export function GeneratePage() {
       if (buffer) {
         const event = parseSSEBuffer(buffer);
         if (event?.type === 'result') {
+          resultReceived = true;
           setOutput(event.payload as GenerateOutput);
           saveLastGeneration(event.payload as GenerateOutput);
           if (!user) {
@@ -136,6 +144,10 @@ export function GeneratePage() {
             setError(event.payload.error ?? `Error ${event.payload.status}`);
           }
         }
+      }
+
+      if (!resultReceived) {
+        setError('Generation finished with no output — check Vercel function logs for details.');
       }
     } catch (err: any) {
       setError(err.message ?? 'Something went wrong');

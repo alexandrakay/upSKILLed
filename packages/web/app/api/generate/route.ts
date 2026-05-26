@@ -67,15 +67,18 @@ export async function POST(req: Request): Promise<Response> {
         try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`)); } catch {}
       };
       try {
+        console.log('[generate] start', { path, input: String(input ?? '').slice(0, 80), uid: uid ?? 'anon' });
         const result = await streamContent(
           { path, input, useCase },
           { onDelta: (delta: string) => enqueue({ delta }) }
         );
+        console.log('[generate] complete', { name: result?.name, hasSkill: !!result?.skillContent, hasConfig: !!result?.configContent });
         await db.collection('generations').add({
           path, input, useCase, createdAt: new Date(), uid: uid ?? null,
         });
         enqueue(result);
       } catch (err: any) {
+        console.error('[generate] error', err?.message, err?.stack);
         enqueue({ error: err?.message ?? 'Internal error', status: 500 });
       } finally {
         controller.close();
