@@ -4,8 +4,6 @@
 
 Generate Claude skill files for any API or CLI tool — in seconds.
 
-**Full release coming soon.** Visit [getupskilled.dev](https://getupskilled.dev) for updates.
-
 ## What it does
 
 `upskilled` generates a complete Claude skill package (3 files) from:
@@ -37,6 +35,19 @@ Every generation produces 3 files:
 - `{name}-skill.md` — Claude skill file, ready to use in any Claude project
 - `{name}-config.json` — Service configuration
 - `{name}-examples.md` — 5–10 example prompts
+
+## Using your skill with Claude
+
+After generating, load the skill into any Claude project:
+
+1. Place the downloaded files somewhere in your project (e.g. `.claude/skills/`)
+2. Reference the skill in your project's `CLAUDE.md`:
+   ```
+   @.claude/skills/{name}-skill.md
+   ```
+3. Claude loads the skill automatically at the start of each session
+
+The `skill.md` file is what Claude reads. `config.json` and `examples.md` are supplementary — keep them alongside it for reference.
 
 ## Requirements
 

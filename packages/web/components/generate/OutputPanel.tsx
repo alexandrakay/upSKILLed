@@ -143,6 +143,15 @@ export function OutputPanel({ output }: Props) {
           );
         })}
       </Tabs>
+
+      <div className="border-t border-white/10 px-4 py-3">
+        <p className="mb-1.5 text-xs font-medium text-neutral-500">Using your skill with Claude</p>
+        <ol className="space-y-1 text-xs text-neutral-600">
+          <li>1. Download the files above (or grab the .zip)</li>
+          <li>2. In your project, add to <span className="font-mono text-neutral-400">CLAUDE.md</span>: <span className="font-mono text-neutral-400">@path/to/{output.name}-skill.md</span></li>
+          <li>3. Claude will load the skill automatically at the start of each session</li>
+        </ol>
+      </div>
     </div>
   );
 }
