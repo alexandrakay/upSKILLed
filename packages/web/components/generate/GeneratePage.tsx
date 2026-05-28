@@ -192,10 +192,11 @@ export function GeneratePage() {
         </Tabs>
 
         <div className="mt-6 space-y-3">
+          <label className="text-xs font-medium text-neutral-500">What do you want to do?</label>
           <Textarea
             value={useCase}
             onChange={(e) => setUseCase(e.target.value)}
-            placeholder='What do you want to do? e.g. "manage issues and pull requests"'
+            placeholder='e.g. "manage issues and pull requests"'
             className="resize-none border-white/10 bg-white/[0.03] text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-purple-500/40"
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
           />
