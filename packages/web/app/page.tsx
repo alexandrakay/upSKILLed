@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Terminal, Sparkles, Check, Copy } from "lucide-react";
+import { Terminal, Sparkles, Check, Copy, ArrowRight, Download, FolderOpen, MessageSquare } from "lucide-react";
 import { SERVICES, TOOLS } from "@/lib/catalog";
-import { cn } from "@/lib/utils";
 
 const installCmd = "npm install -g upskilled";
 
@@ -39,7 +38,7 @@ function ServiceLogoGrid() {
         <div
           key={svc.id}
           title={svc.label}
-          className="flex items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.03] p-2"
+          className="flex items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.03] p-2.5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/5"
         >
           <svg
             role="img"
@@ -62,7 +61,7 @@ function ToolIconGrid() {
       {TOOLS.map((tool) => (
         <div
           key={tool.id}
-          className="flex flex-col items-center gap-1 rounded-md border border-white/[0.06] bg-white/[0.03] p-2"
+          className="flex flex-col items-center gap-1.5 rounded-md border border-white/[0.06] bg-white/[0.03] p-2.5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/5"
         >
           <Terminal className="h-3.5 w-3.5 text-neutral-500" />
           <span className="truncate text-[10px] text-neutral-600 w-full text-center">{tool.label}</span>
@@ -72,18 +71,38 @@ function ToolIconGrid() {
   );
 }
 
+const STATS = [
+  { label: "API services", value: "10" },
+  { label: "CLI tools", value: "8" },
+  { label: "Files generated", value: "3" },
+  { label: "Seconds to skill", value: "~10" },
+];
+
+const HOW_IT_WORKS = [
+  { icon: Sparkles, step: "01", title: "Generate", desc: "Pick a service, tool, or describe your own." },
+  { icon: FolderOpen, step: "02", title: "Add to project", desc: "Reference skill.md from your CLAUDE.md." },
+  { icon: MessageSquare, step: "03", title: "Claude knows it", desc: "Loaded automatically every session." },
+];
+
 export default function Home() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16 sm:py-24">
+    <main className="mx-auto max-w-3xl px-4 pb-24 pt-20 sm:pt-28">
+
       {/* Hero */}
-      <div className="flex flex-col gap-5 mb-16">
-        <div className="inline-flex self-start items-center rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-purple-400">
-          Week 4 of 12
+      <div className="relative mb-20 flex flex-col gap-6">
+        {/* Glow */}
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-purple-600/20 blur-3xl" />
+
+        <div className="inline-flex self-start items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-400 shadow-[0_0_6px_#4ade80]" />
+          Now live on npm
         </div>
 
-        <h1 className="text-[clamp(2.5rem,8vw,4rem)] font-bold leading-[1.1] tracking-tight text-neutral-100">
+        <h1 className="text-[clamp(2.8rem,9vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-neutral-100">
           Claude,{" "}
-          <span className="text-purple-400">upSKILLed.</span>
+          <span className="bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">
+            upSKILLed.
+          </span>
         </h1>
 
         <p className="text-xl text-neutral-400 leading-relaxed max-w-lg">
@@ -93,29 +112,47 @@ export default function Home() {
         <p className="text-[0.95rem] text-neutral-600 leading-relaxed max-w-lg">
           Pick a service, pick a tool, or paste your{" "}
           <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-neutral-400">--help</code>{" "}
-          output. Get a production-ready Claude skill package:{" "}
+          output. Get a production-ready skill package:{" "}
           <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-neutral-400">skill.md</code>,{" "}
-          <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-neutral-400">config.json</code>, and{" "}
+          <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-neutral-400">config.json</code>,{" "}
+          and{" "}
           <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-neutral-400">examples.md</code>.
         </p>
 
-        <div className="flex items-center gap-2 text-sm text-neutral-500">
-          <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]" />
-          Now live
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/generate"
+            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-900/40 transition-colors hover:bg-purple-500"
+          >
+            Try the web app <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href="https://github.com/alexandrakay/upSKILLed"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.08]"
+          >
+            GitHub
+          </a>
         </div>
+      </div>
 
-        <Link
-          href="/generate"
-          className="inline-flex self-start items-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-purple-500"
-        >
-          Try it →
-        </Link>
+      {/* Stats strip */}
+      <div className="mb-20 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {STATS.map(({ label, value }) => (
+          <div
+            key={label}
+            className="flex flex-col items-center gap-1 rounded-xl border border-white/[0.06] bg-white/[0.02] py-4"
+          >
+            <span className="text-2xl font-bold text-purple-400">{value}</span>
+            <span className="text-xs text-neutral-600">{label}</span>
+          </div>
+        ))}
       </div>
 
       {/* Category cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-16">
-        {/* API Services */}
-        <div className="flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+      <div className="mb-20 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="group flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/[0.03]">
           <div>
             <p className="text-sm font-semibold text-neutral-200">API Services</p>
             <p className="mt-1 text-xs text-neutral-600 leading-relaxed">
@@ -125,8 +162,7 @@ export default function Home() {
           <ServiceLogoGrid />
         </div>
 
-        {/* CLI Tools */}
-        <div className="flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+        <div className="group flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/[0.03]">
           <div>
             <p className="text-sm font-semibold text-neutral-200">CLI Tools</p>
             <p className="mt-1 text-xs text-neutral-600 leading-relaxed">
@@ -136,8 +172,7 @@ export default function Home() {
           <ToolIconGrid />
         </div>
 
-        {/* Custom */}
-        <div className="flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+        <div className="group flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/[0.03]">
           <div>
             <p className="text-sm font-semibold text-neutral-200">Custom</p>
             <p className="mt-1 text-xs text-neutral-600 leading-relaxed">
@@ -147,11 +182,11 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2.5 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-2.5">
+            <div className="flex items-center gap-2.5 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 transition-colors group-hover:border-white/10">
               <Sparkles className="h-3.5 w-3.5 shrink-0 text-purple-400" />
               <span className="text-xs text-neutral-500">Describe it in plain English</span>
             </div>
-            <div className="flex items-center gap-2.5 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-2.5">
+            <div className="flex items-center gap-2.5 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 transition-colors group-hover:border-white/10">
               <Terminal className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
               <span className="font-mono text-xs text-neutral-500">Paste --help output</span>
             </div>
@@ -159,19 +194,47 @@ export default function Home() {
         </div>
       </div>
 
-      {/* npm install */}
-      <div className="mb-6">
-        <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-600">
-          Install the CLI
-        </p>
+      {/* How it works teaser */}
+      <div className="mb-20 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+        <div className="mb-5 flex items-center justify-between">
+          <p className="text-sm font-semibold text-neutral-200">How it works</p>
+          <Link href="/how-it-works" className="text-xs text-neutral-500 transition-colors hover:text-purple-400">
+            See full walkthrough →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {HOW_IT_WORKS.map(({ icon: Icon, step, title, desc }) => (
+            <div key={step} className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-purple-500">{step}</span>
+                <Icon className="h-3.5 w-3.5 text-neutral-500" />
+                <span className="text-xs font-semibold text-neutral-300">{title}</span>
+              </div>
+              <p className="text-xs text-neutral-600 leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CLI install */}
+      <div className="mb-16">
+        <div className="mb-3 flex items-center gap-2">
+          <Download className="h-3.5 w-3.5 text-neutral-600" />
+          <p className="text-xs font-medium uppercase tracking-widest text-neutral-600">
+            Install the CLI
+          </p>
+        </div>
         <CopySnippet />
         <p className="mt-2 text-xs text-neutral-700">
-          v1.0.0 on npm. Generates skill files directly to your project from the terminal.
+          v1.0.1 · Node.js v18+ · Requires <code className="font-mono">ANTHROPIC_API_KEY</code>
         </p>
       </div>
 
       {/* Footer links */}
-      <div className="flex gap-5 pt-2">
+      <div className="flex flex-wrap gap-5 pt-2 border-t border-white/[0.06]">
+        <Link href="/how-it-works" className="text-sm text-neutral-600 transition-colors hover:text-neutral-300">
+          How it works →
+        </Link>
         <a
           href="https://github.com/alexandrakay/upSKILLed"
           target="_blank"
