@@ -17,6 +17,7 @@ import {
   saveLastGeneration,
   loadLastGeneration,
   parseSSEBuffer,
+  formatCountdown,
   type GenerateOutput,
 } from '@/lib/generate-logic';
 
@@ -35,6 +36,7 @@ export function GeneratePage() {
   const [error, setError] = useState<string | null>(null);
   const [usageCount, setUsageCount] = useState(0);
   const [anonLimited, setAnonLimited] = useState(false);
+  const [resetAt, setResetAt] = useState<string | null>(null);
   const [signInOpen, setSignInOpen] = useState(false);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function GeneratePage() {
 
   // Clear anon limit when user signs in
   useEffect(() => {
-    if (user) setAnonLimited(false);
+    if (user) { setAnonLimited(false); setResetAt(null); }
   }, [user]);
 
   const getInput = () => {
@@ -109,6 +111,7 @@ export function GeneratePage() {
             errorHandled = true;
             if (payload.status === 429) {
               setAnonLimited(true);
+              setResetAt(payload.resetAt ?? null);
               setSignInOpen(true);
             } else {
               setError(payload.error ?? `Error ${payload.status}`);
@@ -215,15 +218,22 @@ export function GeneratePage() {
                 </p>
               )}
               {rateLimited && (
-                <p className="text-xs text-amber-400">
-                  Daily limit reached.{' '}
-                  <button
-                    onClick={() => setSignInOpen(true)}
-                    className="underline hover:text-amber-300"
-                  >
-                    Sign in for unlimited generations.
-                  </button>
-                </p>
+                <div className="space-y-1">
+                  <p className="text-xs text-amber-400">
+                    Daily limit reached.{' '}
+                    <button
+                      onClick={() => setSignInOpen(true)}
+                      className="underline hover:text-amber-300"
+                    >
+                      Sign in for unlimited generations.
+                    </button>
+                  </p>
+                  {formatCountdown(resetAt) && (
+                    <p className="text-xs text-neutral-600">
+                      Resets in {formatCountdown(resetAt)}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
