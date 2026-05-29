@@ -22,15 +22,26 @@ export function ServiceGrid({ selected, onSelect }: Props) {
               : 'border-white/10 bg-white/[0.03] text-neutral-400 hover:border-white/20 hover:text-neutral-200'
           )}
         >
-          <svg
-            role="img"
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill={selected === svc.id ? '#a855f7' : `#${svc.icon.hex}`}
-            aria-label={svc.label}
-          >
-            <path d={svc.icon.path} />
-          </svg>
+          {svc.icon ? (
+            <svg
+              role="img"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill={selected === svc.id ? '#a855f7' : `#${svc.icon.hex}`}
+              aria-label={svc.label}
+            >
+              <path d={svc.icon.path} />
+            </svg>
+          ) : (
+            <span
+              className={cn(
+                'flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold',
+                selected === svc.id ? 'text-purple-300' : 'text-neutral-500'
+              )}
+            >
+              {svc.label.slice(0, 2).toUpperCase()}
+            </span>
+          )}
           {svc.label}
         </button>
       ))}

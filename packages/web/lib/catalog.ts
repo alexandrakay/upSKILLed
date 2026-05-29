@@ -1,12 +1,13 @@
 import {
   siGithub, siNotion, siLinear, siStripe,
   siJira, siGmail, siAsana, siVercel, siFigma,
+  siSupabase, siHuggingface, siAirtable, siDiscord, siHubspot,
 } from 'simple-icons';
 
 export type ServiceEntry = {
   id: string;
   label: string;
-  icon: { hex: string; path: string };
+  icon: { hex: string; path: string } | null;
 };
 
 // simple-icons v16 dropped siSlack; inline the path from Slack brand assets
@@ -22,16 +23,24 @@ export type ToolEntry = {
 };
 
 export const SERVICES: ServiceEntry[] = [
-  { id: 'github',  label: 'GitHub',  icon: siGithub  },
-  { id: 'notion',  label: 'Notion',  icon: siNotion  },
-  { id: 'slack',   label: 'Slack',   icon: siSlack   },
-  { id: 'linear',  label: 'Linear',  icon: siLinear  },
-  { id: 'stripe',  label: 'Stripe',  icon: siStripe  },
-  { id: 'jira',    label: 'Jira',    icon: siJira    },
-  { id: 'gmail',   label: 'Gmail',   icon: siGmail   },
-  { id: 'asana',   label: 'Asana',   icon: siAsana   },
-  { id: 'vercel',  label: 'Vercel',  icon: siVercel  },
-  { id: 'figma',   label: 'Figma',   icon: siFigma   },
+  { id: 'github',       label: 'GitHub',       icon: siGithub       },
+  { id: 'notion',       label: 'Notion',       icon: siNotion       },
+  { id: 'slack',        label: 'Slack',        icon: siSlack        },
+  { id: 'linear',       label: 'Linear',       icon: siLinear       },
+  { id: 'stripe',       label: 'Stripe',       icon: siStripe       },
+  { id: 'jira',         label: 'Jira',         icon: siJira         },
+  { id: 'gmail',        label: 'Gmail',        icon: siGmail        },
+  { id: 'asana',        label: 'Asana',        icon: siAsana        },
+  { id: 'vercel',       label: 'Vercel',       icon: siVercel       },
+  { id: 'figma',        label: 'Figma',        icon: siFigma        },
+  { id: 'supabase',     label: 'Supabase',     icon: siSupabase     },
+  { id: 'openai',       label: 'OpenAI',       icon: null           },
+  { id: 'twilio',       label: 'Twilio',       icon: null           },
+  { id: 'huggingface',  label: 'HuggingFace',  icon: siHuggingface  },
+  { id: 'airtable',     label: 'Airtable',     icon: siAirtable     },
+  { id: 'discord',      label: 'Discord',      icon: siDiscord      },
+  { id: 'hubspot',      label: 'HubSpot',      icon: siHubspot      },
+  { id: 'salesforce',   label: 'Salesforce',   icon: null           },
 ];
 
 export const TOOLS: ToolEntry[] = [
