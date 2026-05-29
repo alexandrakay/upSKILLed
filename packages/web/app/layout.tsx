@@ -4,12 +4,23 @@ import { AuthProvider } from "@/lib/auth-context";
 import { NavBar } from "@/components/auth/NavBar";
 
 export const metadata: Metadata = {
-  title: "upSKILLed — Claude, upSKILLed.",
-  description: "Generate Claude skill files for any API or CLI tool — in seconds.",
+  title: {
+    default: "upSKILLed — Claude, upSKILLed.",
+    template: "%s — upSKILLed",
+  },
+  description: "Generate Claude skill files for any API or CLI tool — in seconds. Give Claude deep knowledge of GitHub, Stripe, Notion, ffuf, and more.",
+  metadataBase: new URL("https://getupskilled.dev"),
   openGraph: {
-    title: "upSKILLed",
+    title: "upSKILLed — Claude, upSKILLed.",
     description: "Generate Claude skill files for any API or CLI tool — in seconds.",
     url: "https://getupskilled.dev",
+    siteName: "upSKILLed",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "upSKILLed — Claude, upSKILLed.",
+    description: "Generate Claude skill files for any API or CLI tool — in seconds.",
   },
 };
 
