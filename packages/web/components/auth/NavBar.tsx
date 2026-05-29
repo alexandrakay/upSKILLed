@@ -18,6 +18,12 @@ export function NavBar() {
 
         <div className="flex items-center gap-3">
           <Link
+            href="/generate"
+            className="rounded-md px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-200"
+          >
+            Generate
+          </Link>
+          <Link
             href="/how-it-works"
             className="rounded-md px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-200"
           >
