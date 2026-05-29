@@ -40,15 +40,21 @@ function ServiceLogoGrid() {
           title={svc.label}
           className="flex items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.03] p-2.5 transition-colors hover:border-purple-500/20 hover:bg-purple-500/5"
         >
-          <svg
-            role="img"
-            viewBox="0 0 24 24"
-            className="h-4 w-4"
-            fill={`#${svc.icon.hex}`}
-            aria-label={svc.label}
-          >
-            <path d={svc.icon.path} />
-          </svg>
+          {svc.icon ? (
+            <svg
+              role="img"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill={`#${svc.icon.hex}`}
+              aria-label={svc.label}
+            >
+              <path d={svc.icon.path} />
+            </svg>
+          ) : (
+            <span className="flex h-4 w-4 items-center justify-center text-[8px] font-bold text-neutral-500">
+              {svc.label.slice(0, 2).toUpperCase()}
+            </span>
+          )}
         </div>
       ))}
     </div>
