@@ -72,8 +72,8 @@ function ToolIconGrid() {
 }
 
 const STATS = [
-  { label: "API services", value: "10" },
-  { label: "CLI tools", value: "8" },
+  { label: "API services", value: "18" },
+  { label: "CLI tools", value: "15" },
   { label: "Files generated", value: "3" },
   { label: "Seconds to skill", value: "~10" },
 ];
@@ -156,7 +156,7 @@ export default function Home() {
           <div>
             <p className="text-sm font-semibold text-neutral-200">API Services</p>
             <p className="mt-1 text-xs text-neutral-600 leading-relaxed">
-              10 popular APIs with pre-loaded context — endpoints, auth, and capabilities.
+              18 popular APIs with pre-loaded context — endpoints, auth, and capabilities.
             </p>
           </div>
           <ServiceLogoGrid />
@@ -166,7 +166,7 @@ export default function Home() {
           <div>
             <p className="text-sm font-semibold text-neutral-200">CLI Tools</p>
             <p className="mt-1 text-xs text-neutral-600 leading-relaxed">
-              8 security and DevOps tools with flag context and domain expertise baked in.
+              15 security and DevOps tools with flag context and domain expertise baked in.
             </p>
           </div>
           <ToolIconGrid />

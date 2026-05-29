@@ -59,6 +59,17 @@ test('getTool returns definition for each of the 8 tools', () => {
   }
 });
 
+test('getTool returns definition for each of the 7 new tools', () => {
+  const tools = ['httpx', 'nuclei', 'curl', 'jq', 'docker', 'kubectl', 'aws'];
+  for (const t of tools) {
+    const def = getTool(t);
+    assert.ok(def.displayName, `${t} missing displayName`);
+    assert.ok(def.description, `${t} missing description`);
+    assert.ok(Array.isArray(def.capabilities), `${t} missing capabilities`);
+    assert.ok(def.capabilities.length >= 8, `${t} needs ≥8 capabilities`);
+  }
+});
+
 // ── Prompt builders ───────────────────────────────────────────────────────────
 
 test('buildToolPrompt includes tool name and use case', () => {
