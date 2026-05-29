@@ -135,6 +135,39 @@ test('loadLastGeneration returns valid entry unchanged', () => {
   assert.deepEqual(loaded, saved);
 });
 
+// ── Rate limit countdown ──────────────────────────────────────────────────────
+
+import { formatCountdown } from '../lib/generate-logic.ts';
+
+test('formatCountdown returns null for null resetAt', () => {
+  assert.equal(formatCountdown(null), null);
+});
+
+test('formatCountdown returns null when resetAt is in the past', () => {
+  const past = new Date(Date.now() - 60_000).toISOString();
+  assert.equal(formatCountdown(past), null);
+});
+
+test('formatCountdown returns "Xh Ym" for multi-hour resets', () => {
+  const future = new Date(Date.now() + 2 * 3_600_000 + 15 * 60_000).toISOString();
+  assert.equal(formatCountdown(future), '2h 15m');
+});
+
+test('formatCountdown returns "1h 0m" for exactly 1 hour', () => {
+  const future = new Date(Date.now() + 3_600_000).toISOString();
+  assert.equal(formatCountdown(future), '1h 0m');
+});
+
+test('formatCountdown returns "Xm" for sub-hour resets', () => {
+  const future = new Date(Date.now() + 23 * 60_000).toISOString();
+  assert.equal(formatCountdown(future), '23m');
+});
+
+test('formatCountdown returns "1m" for less than 2 minutes', () => {
+  const future = new Date(Date.now() + 90_000).toISOString();
+  assert.equal(formatCountdown(future), '1m');
+});
+
 // ── File name helpers ─────────────────────────────────────────────────────────
 
 test('buildFilenames returns 3 correctly named files', () => {

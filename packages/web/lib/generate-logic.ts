@@ -77,6 +77,17 @@ export function parseSSEBuffer(buffer: string): SSEEvent | null {
   return null;
 }
 
+export function formatCountdown(resetAt: string | null): string | null {
+  if (!resetAt) return null;
+  const ms = new Date(resetAt).getTime() - Date.now();
+  if (ms <= 0) return null;
+  const totalMinutes = Math.max(1, Math.floor(ms / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${totalMinutes}m`;
+}
+
 export function downloadText(filename: string, content: string): void {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
