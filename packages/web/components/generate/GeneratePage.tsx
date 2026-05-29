@@ -151,7 +151,7 @@ export function GeneratePage() {
       }
 
       if (!resultReceived && !errorHandled) {
-        setError('Generation finished with no output — check Vercel function logs for details.');
+        setError('No output received. Please try again — if the problem continues, the service may be temporarily unavailable.');
       }
     } catch (err: any) {
       setError(err.message ?? 'Something went wrong');
