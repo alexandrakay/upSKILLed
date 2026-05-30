@@ -43,15 +43,15 @@ You MUST respond with a single JSON object in this exact schema — no prose, no
 }
 
 Requirements:
-- skill.md markdownContent must be rich and detailed (400+ words). Include: overview, auth setup, key capabilities, code examples for the 3 most common operations, error handling notes, and rate limiting info where relevant.
-- config.json tools array must have 5-10 realistic tool definitions with descriptive names.
-- examples array must have at least 5 diverse, realistic prompts a developer would actually type.
+- skill.md markdownContent must be clear and useful (200+ words). Include: overview, auth setup, key capabilities, a code example for the most common operation, and any important gotchas.
+- config.json tools array must have 4-6 realistic tool definitions with descriptive names.
+- examples array must have at least 4 diverse, realistic prompts a developer would actually type.
 - All strings must be valid JSON (escape special characters properly).`;
 
 export function buildServicePrompt(service, useCase) {
   const svc = getService(service);
 
-  const serviceDefinition = `## Service: ${svc.displayName}
+  const systemContext = `## Service: ${svc.displayName}
 
 **Description**: ${svc.description}
 **Base URL**: ${svc.baseUrl}
@@ -63,21 +63,15 @@ ${svc.capabilities.map((c) => `- ${c}`).join('\n')}
 
 **Common use cases**: ${svc.useCases.join('; ')}`;
 
-  const userMessage = `${serviceDefinition}
+  const userMessage = `Generate a complete Claude skill package for ${svc.displayName} optimized for: ${useCase}.`;
 
----
-
-**Use case to optimize for**: ${useCase}
-
-Generate a complete Claude skill package for ${svc.displayName}. The skill.md and config.json should be especially helpful for a developer who wants to: ${useCase}.`;
-
-  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+  return { systemPrompt: SYSTEM_PROMPT, systemContext, userMessage };
 }
 
 export function buildToolPrompt(tool, useCase) {
   const t = getTool(tool);
 
-  const toolDefinition = `## CLI Tool: ${t.displayName}
+  const systemContext = `## CLI Tool: ${t.displayName}
 
 **Description**: ${t.description}
 **Docs**: ${t.docsUrl}
@@ -90,29 +84,17 @@ ${t.capabilities.map((c) => `- ${c}`).join('\n')}
 
 **Common use cases**: ${t.useCases.join('; ')}`;
 
-  const userMessage = `${toolDefinition}
+  const userMessage = `Generate a complete Claude skill package for ${t.displayName} optimized for: ${useCase}.`;
 
----
-
-**Use case to optimize for**: ${useCase}
-
-Generate a complete Claude skill package for ${t.displayName}. The skill.md should read like expert documentation a security professional or developer would reference while using ${t.displayName} to: ${useCase}.`;
-
-  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+  return { systemPrompt: SYSTEM_PROMPT, systemContext, userMessage };
 }
 
 export function buildDescribePrompt(description, useCase) {
-  const userMessage = `## Custom Service/Tool Description
+  const systemContext = `## Custom Service/Tool Description\n\n${description}`;
 
-${description}
+  const userMessage = `Generate a complete Claude skill package based on the description above. Infer the authentication type, base URL patterns, and capabilities from the description. Optimized for: ${useCase}.`;
 
----
-
-**Use case to optimize for**: ${useCase}
-
-Generate a complete Claude skill package based on the description above. Infer the authentication type, base URL patterns, and capabilities from the description. The skill should be optimized for a developer who wants to: ${useCase}.`;
-
-  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+  return { systemPrompt: SYSTEM_PROMPT, systemContext, userMessage };
 }
 
 export function buildHelpPrompt(helpText, useCase) {
@@ -122,17 +104,9 @@ export function buildHelpPrompt(helpText, useCase) {
     process.stderr.write(`Warning: --help input exceeded 32KB and was truncated.\n`);
   }
 
-  const userMessage = `## CLI Tool --help Output
+  const systemContext = `## CLI Tool --help Output\n\n\`\`\`\n${truncated}\n\`\`\``;
 
-\`\`\`
-${truncated}
-\`\`\`
+  const userMessage = `Generate a complete Claude skill package based on the --help output above. Infer the tool name, purpose, authentication, and capabilities from the help text. Optimized for: ${useCase}.`;
 
----
-
-**Use case to optimize for**: ${useCase}
-
-Generate a complete Claude skill package based on the --help output above. Infer the tool name, purpose, authentication, and capabilities from the help text. The skill should be optimized for a developer who wants to: ${useCase}.`;
-
-  return { systemPrompt: SYSTEM_PROMPT, userMessage };
+  return { systemPrompt: SYSTEM_PROMPT, systemContext, userMessage };
 }

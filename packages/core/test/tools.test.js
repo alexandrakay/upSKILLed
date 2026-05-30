@@ -73,32 +73,32 @@ test('getTool returns definition for each of the 7 new tools', () => {
 // ── Prompt builders ───────────────────────────────────────────────────────────
 
 test('buildToolPrompt includes tool name and use case', () => {
-  const { systemPrompt, userMessage } = buildToolPrompt('ffuf', 'fuzz web directories');
+  const { systemPrompt, systemContext, userMessage } = buildToolPrompt('ffuf', 'fuzz web directories');
   assert.ok(systemPrompt.length > 100, 'systemPrompt too short');
-  assert.ok(userMessage.includes('ffuf'), 'userMessage missing tool name');
+  assert.ok(systemContext.includes('ffuf'), 'systemContext missing tool name');
   assert.ok(userMessage.includes('fuzz web directories'), 'userMessage missing use case');
 });
 
 test('buildDescribePrompt includes description and use case', () => {
-  const { systemPrompt, userMessage } = buildDescribePrompt('a REST API for sending SMS', 'send alerts');
-  assert.ok(userMessage.includes('a REST API for sending SMS'));
+  const { systemContext, userMessage } = buildDescribePrompt('a REST API for sending SMS', 'send alerts');
+  assert.ok(systemContext.includes('a REST API for sending SMS'));
   assert.ok(userMessage.includes('send alerts'));
 });
 
 test('buildHelpPrompt includes help text and use case', () => {
   const helpText = 'Usage: ffuf [options]\n  -u  target URL';
-  const { userMessage } = buildHelpPrompt(helpText, 'directory fuzzing');
-  assert.ok(userMessage.includes(helpText));
+  const { systemContext, userMessage } = buildHelpPrompt(helpText, 'directory fuzzing');
+  assert.ok(systemContext.includes(helpText));
   assert.ok(userMessage.includes('directory fuzzing'));
 });
 
 test('buildHelpPrompt truncates input over 32KB', () => {
   const bigHelp = 'x'.repeat(40 * 1024);
-  const { userMessage } = buildHelpPrompt(bigHelp, 'test');
+  const { systemContext } = buildHelpPrompt(bigHelp, 'test');
   const MAX = 32 * 1024;
-  assert.ok(userMessage.length < bigHelp.length + 500, 'should be shorter than original');
-  assert.ok(!userMessage.includes(bigHelp), 'should not contain full input');
-  const contained = userMessage.includes('x'.repeat(MAX));
+  assert.ok(systemContext.length < bigHelp.length + 500, 'should be shorter than original');
+  assert.ok(!systemContext.includes(bigHelp), 'should not contain full input');
+  const contained = systemContext.includes('x'.repeat(MAX));
   assert.ok(contained, 'should contain first 32KB of input');
 });
 

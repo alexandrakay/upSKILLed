@@ -24,28 +24,30 @@ function resolveApiKey(options) {
   return key;
 }
 
-async function callClaude(client, systemPrompt, userMessage) {
+function buildSystem(systemPrompt, systemContext) {
+  const blocks = [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }];
+  if (systemContext) {
+    blocks.push({ type: 'text', text: systemContext, cache_control: { type: 'ephemeral' } });
+  }
+  return blocks;
+}
+
+async function callClaude(client, systemPrompt, systemContext, userMessage) {
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 8192,
-    system: [
-      {
-        type: 'text',
-        text: systemPrompt,
-        cache_control: { type: 'ephemeral' },
-      },
-    ],
+    max_tokens: 4096,
+    system: buildSystem(systemPrompt, systemContext),
     messages: [{ role: 'user', content: userMessage }],
   });
   return response.content.find((b) => b.type === 'text')?.text ?? '';
 }
 
-async function callClaudeStream(client, systemPrompt, userMessage, onDelta) {
+async function callClaudeStream(client, systemPrompt, systemContext, userMessage, onDelta) {
   let text = '';
   const stream = client.messages.stream({
     model: MODEL,
-    max_tokens: 8192,
-    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+    max_tokens: 4096,
+    system: buildSystem(systemPrompt, systemContext),
     messages: [{ role: 'user', content: userMessage }],
   });
   for await (const chunk of stream) {
@@ -57,12 +59,12 @@ async function callClaudeStream(client, systemPrompt, userMessage, onDelta) {
   return text;
 }
 
-async function generateWithRetry(client, systemPrompt, userMessage) {
-  const raw = await callClaude(client, systemPrompt, userMessage);
+async function generateWithRetry(client, systemPrompt, systemContext, userMessage) {
+  const raw = await callClaude(client, systemPrompt, systemContext, userMessage);
   try {
     return parseResponse(raw);
   } catch {
-    const retryText = await callClaude(client, systemPrompt, userMessage + SCHEMA_REMINDER);
+    const retryText = await callClaude(client, systemPrompt, systemContext, userMessage + SCHEMA_REMINDER);
     return parseResponse(retryText);
   }
 }
@@ -92,8 +94,8 @@ export async function generate(options, { client } = {}) {
   const apiKey = client ? null : resolveApiKey(options);
   const anthropicClient = client ?? new Anthropic({ apiKey });
 
-  const { systemPrompt, userMessage } = await buildPrompt(options);
-  const result = await generateWithRetry(anthropicClient, systemPrompt, userMessage);
+  const { systemPrompt, systemContext, userMessage } = await buildPrompt(options);
+  const result = await generateWithRetry(anthropicClient, systemPrompt, systemContext, userMessage);
 
   return writeFiles(result, { output: options.output, name: options.name });
 }
@@ -105,15 +107,15 @@ export async function streamContent(options, { client, onDelta } = {}) {
   const apiKey = client ? null : resolveApiKey(options);
   const anthropicClient = client ?? new Anthropic({ apiKey });
 
-  const { systemPrompt, userMessage } = await buildPrompt(options);
-  const raw = await callClaudeStream(anthropicClient, systemPrompt, userMessage, onDelta);
+  const { systemPrompt, systemContext, userMessage } = await buildPrompt(options);
+  const raw = await callClaudeStream(anthropicClient, systemPrompt, systemContext, userMessage, onDelta);
   try {
     const parsed = parseResponse(raw);
     console.log('[core] parsed keys:', Object.keys(parsed), 'skill keys:', Object.keys(parsed.skill ?? {}), 'config.name:', parsed.config?.name);
     return formatContent(parsed, options.name);
   } catch (err) {
     console.error('[core] parse/format failed, retrying:', err?.message, '| raw length:', raw.length, '| raw start:', raw.slice(0, 100));
-    const retryRaw = await callClaudeStream(anthropicClient, systemPrompt, userMessage + SCHEMA_REMINDER, onDelta);
+    const retryRaw = await callClaudeStream(anthropicClient, systemPrompt, systemContext, userMessage + SCHEMA_REMINDER, onDelta);
     return formatContent(parseResponse(retryRaw), options.name);
   }
 }
@@ -125,8 +127,8 @@ export async function generateContent(options, { client } = {}) {
   const apiKey = client ? null : resolveApiKey(options);
   const anthropicClient = client ?? new Anthropic({ apiKey });
 
-  const { systemPrompt, userMessage } = await buildPrompt(options);
-  const result = await generateWithRetry(anthropicClient, systemPrompt, userMessage);
+  const { systemPrompt, systemContext, userMessage } = await buildPrompt(options);
+  const result = await generateWithRetry(anthropicClient, systemPrompt, systemContext, userMessage);
 
   return formatContent(result, options.name);
 }
