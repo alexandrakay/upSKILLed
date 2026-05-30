@@ -95,7 +95,7 @@ export function OutputPanel({ output }: Props) {
   };
 
   return (
-    <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.02]">
+    <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.02] animate-slide-up">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <p className="text-sm font-medium text-neutral-200">
           Generated: <span className="text-purple-400">{output.name}</span>

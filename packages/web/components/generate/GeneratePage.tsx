@@ -240,7 +240,7 @@ export function GeneratePage() {
             <Button
               onClick={handleGenerate}
               disabled={!canGenerate}
-              className="gap-2 bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-40"
+              className={`gap-2 bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-40 transition-shadow duration-300${canGenerate ? ' shadow-[0_0_22px_rgba(168,85,247,0.5)]' : ''}`}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Generating…' : 'Generate →'}

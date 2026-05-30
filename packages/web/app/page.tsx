@@ -106,7 +106,13 @@ export default function Home() {
 
         <h1 className="text-[clamp(2.8rem,9vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-neutral-100">
           Claude,{" "}
-          <span className="bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">
+          <span
+            className="bg-clip-text text-transparent animate-gradient-x"
+            style={{
+              backgroundImage: 'linear-gradient(to right, #c084fc, #e879f9, #818cf8, #c084fc)',
+              backgroundSize: '200% auto',
+            }}
+          >
             upSKILLed.
           </span>
         </h1>
