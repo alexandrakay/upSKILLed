@@ -57,14 +57,14 @@ function HighlightedCode({ code, lang }: { code: string; lang: string }) {
   if (html) {
     return (
       <div
-        className="overflow-auto rounded-b-lg text-sm [&>pre]:p-4"
+        className="max-h-[500px] overflow-auto rounded-b-lg text-sm [&>pre]:p-4"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     );
   }
 
   return (
-    <pre className="overflow-auto rounded-b-lg bg-[#0d1117] p-4 text-sm text-neutral-300">
+    <pre className="max-h-[500px] overflow-auto rounded-b-lg bg-[#0d1117] p-4 text-sm text-neutral-300">
       {code}
     </pre>
   );
