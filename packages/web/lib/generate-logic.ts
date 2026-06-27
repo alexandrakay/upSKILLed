@@ -88,6 +88,17 @@ export function formatCountdown(resetAt: string | null): string | null {
   return `${totalMinutes}m`;
 }
 
+export function slugify(text: string, maxLength = 40): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, maxLength)
+    .replace(/-$/, '');
+}
+
 export function downloadText(filename: string, content: string): void {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
