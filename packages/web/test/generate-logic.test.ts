@@ -137,7 +137,7 @@ test('loadLastGeneration returns valid entry unchanged', () => {
 
 // ── Rate limit countdown ──────────────────────────────────────────────────────
 
-import { formatCountdown } from '../lib/generate-logic.ts';
+import { formatCountdown, slugify } from '../lib/generate-logic.ts';
 
 test('formatCountdown returns null for null resetAt', () => {
   assert.equal(formatCountdown(null), null);
@@ -166,6 +166,26 @@ test('formatCountdown returns "Xm" for sub-hour resets', () => {
 test('formatCountdown returns "1m" for less than 2 minutes', () => {
   const future = new Date(Date.now() + 90_000).toISOString();
   assert.equal(formatCountdown(future), '1m');
+});
+
+// ── slugify ───────────────────────────────────────────────────────────────────
+
+test('slugify converts text to kebab-case slug', () => {
+  assert.equal(slugify('Medium Writer'), 'medium-writer');
+  assert.equal(slugify('  My Cool Skill  '), 'my-cool-skill');
+  assert.equal(slugify('GitHub: API service!'), 'github-api-service');
+});
+
+test('slugify truncates long strings to 40 chars by default', () => {
+  const long = 'I want to write a skill that creates medium articles based on what I am building and sharing';
+  const result = slugify(long);
+  assert.ok(result.length <= 40, `expected <= 40 chars, got ${result.length}`);
+  assert.ok(!result.endsWith('-'), 'should not end with a hyphen');
+});
+
+test('slugify collapses multiple spaces and hyphens', () => {
+  assert.equal(slugify('foo  bar   baz'), 'foo-bar-baz');
+  assert.equal(slugify('foo--bar'), 'foo-bar');
 });
 
 // ── File name helpers ─────────────────────────────────────────────────────────

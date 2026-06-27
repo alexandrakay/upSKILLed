@@ -18,6 +18,7 @@ import {
   loadLastGeneration,
   parseSSEBuffer,
   formatCountdown,
+  slugify,
   type GenerateOutput,
 } from '@/lib/generate-logic';
 
@@ -31,6 +32,7 @@ export function GeneratePage() {
   const [customMode, setCustomMode] = useState<'describe' | 'help'>('describe');
   const [customInput, setCustomInput] = useState('');
   const [useCase, setUseCase] = useState('');
+  const [skillName, setSkillName] = useState('');
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState<GenerateOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -119,8 +121,11 @@ export function GeneratePage() {
             break outer;
           }
           resultReceived = true;
-          setOutput(payload as GenerateOutput);
-          saveLastGeneration(payload as GenerateOutput);
+          const result = payload as GenerateOutput;
+          const resolvedName = skillName.trim() ? slugify(skillName) : slugify(useCase, 40);
+          const namedResult = resolvedName ? { ...result, name: resolvedName } : result;
+          setOutput(namedResult);
+          saveLastGeneration(namedResult);
           if (!user) {
             const { count } = incrementLocalUsage();
             setUsageCount(count);
@@ -135,8 +140,11 @@ export function GeneratePage() {
         const event = parseSSEBuffer(buffer);
         if (event?.type === 'result') {
           resultReceived = true;
-          setOutput(event.payload as GenerateOutput);
-          saveLastGeneration(event.payload as GenerateOutput);
+          const result = event.payload as GenerateOutput;
+          const resolvedName = skillName.trim() ? slugify(skillName) : slugify(useCase, 40);
+          const namedResult = resolvedName ? { ...result, name: resolvedName } : result;
+          setOutput(namedResult);
+          saveLastGeneration(namedResult);
           if (!user) {
             const { count } = incrementLocalUsage();
             setUsageCount(count);
@@ -203,6 +211,16 @@ export function GeneratePage() {
             className="resize-none border-white/10 bg-white/[0.03] text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-purple-500/40"
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
           />
+          <div>
+            <label className="text-xs font-medium text-neutral-500">Skill name <span className="font-normal text-neutral-600">(optional)</span></label>
+            <input
+              type="text"
+              value={skillName}
+              onChange={(e) => setSkillName(e.target.value)}
+              placeholder="e.g. medium-writer"
+              className="mt-1.5 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 outline-none focus:ring-1 focus:ring-purple-500/40"
+            />
+          </div>
 
           <div className="flex items-center justify-between">
             <div>
